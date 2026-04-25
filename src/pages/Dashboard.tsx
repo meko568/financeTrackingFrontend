@@ -57,7 +57,12 @@ const Dashboard = () => {
 
   const recentTransactions = data?.recent_transactions ?? []
 
-  const budgetData = [] // TODO: Add budget data when available
+  const budgetData: {
+    id: string
+    category: string
+    spent: number
+    limit: number
+  }[] = []
 
   return (
     <div className="min-h-screen pb-24 px-4 py-6">
