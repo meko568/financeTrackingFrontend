@@ -1,121 +1,80 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { type ReactNode } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import { ToastProvider } from './components/ui/ToastProvider'
+import Sidebar from './components/layout/Sidebar'
+import MobileNav from './components/layout/MobileNav'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Transactions from './pages/Transactions'
+import Budget from './pages/Budget'
+import AIAssistant from './pages/AIAssistant'
+import Reports from './pages/Reports'
+import Settings from './pages/Settings'
+import ProtectedRoute from './components/routes/ProtectedRoute'
+import PublicOnlyRoute from './components/routes/PublicOnlyRoute'
 
-function App() {
-  const [count, setCount] = useState(0)
+const PageTransition = ({ children }: { children: ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -18 }}
+    transition={{ duration: 0.28, ease: 'easeOut' }}
+    className="w-full"
+  >
+    {children}
+  </motion.div>
+)
+
+const AnimatedRoutes = () => {
+  const location = useLocation()
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><PublicOnlyRoute><Login /></PublicOnlyRoute></PageTransition>} />
+        <Route path="/register" element={<PageTransition><PublicOnlyRoute><Register /></PublicOnlyRoute></PageTransition>} />
+        <Route path="/dashboard" element={<PageTransition><ProtectedRoute><Dashboard /></ProtectedRoute></PageTransition>} />
+        <Route path="/transactions" element={<PageTransition><ProtectedRoute><Transactions /></ProtectedRoute></PageTransition>} />
+        <Route path="/budget" element={<PageTransition><ProtectedRoute><Budget /></ProtectedRoute></PageTransition>} />
+        <Route path="/ai-assistant" element={<PageTransition><ProtectedRoute><AIAssistant /></ProtectedRoute></PageTransition>} />
+        <Route path="/reports" element={<PageTransition><ProtectedRoute><Reports /></ProtectedRoute></PageTransition>} />
+        <Route path="/settings" element={<PageTransition><ProtectedRoute><Settings /></ProtectedRoute></PageTransition>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   )
 }
 
-export default App
+function App() {
+  const location = useLocation()
+  const { i18n } = useTranslation()
+  const hideSidebar = ['/login', '/register', '/'].includes(location.pathname)
+  const isRTL = i18n.language === 'ar'
+
+  return (
+    <ToastProvider>
+      <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-navy dark:text-slate-100">
+        <MobileNav />
+        <div className={`mx-auto flex min-h-screen max-w-[1720px] gap-6 px-4 py-5 xl:px-8 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}>
+          {!hideSidebar && <Sidebar />}
+          <main className="flex-1">
+            <AnimatedRoutes />
+          </main>
+        </div>
+      </div>
+    </ToastProvider>
+  )
+}
+
+const AppWrapper = () => (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+)
+
+export default AppWrapper
