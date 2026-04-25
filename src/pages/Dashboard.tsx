@@ -26,13 +26,13 @@ const Dashboard = () => {
   if (data && data.last_6_months && data.last_6_months.length > 1) {
     const prevMonth = data.last_6_months[data.last_6_months.length - 2]
     balanceChange = data.total_balance !== 0
-      ? ((data.total_balance - (data.total_balance - prevMonth.income + prevMonth.expenses)) / Math.abs(data.total_balance)) * 100
+      ? ((data.total_balance - (data.total_balance - (prevMonth?.income ?? 0) + (prevMonth?.expenses ?? 0))) / Math.abs(data.total_balance)) * 100
       : 0
-    incomeChange = prevMonth.income !== 0
-      ? ((data.monthly_income - prevMonth.income) / Math.abs(prevMonth.income)) * 100
+    incomeChange = prevMonth?.income !== 0
+      ? (((data.monthly_income ?? 0) - (prevMonth?.income ?? 0)) / Math.abs(prevMonth?.income ?? 1)) * 100
       : 0
-    expensesChange = prevMonth.expenses !== 0
-      ? ((Math.abs(data.monthly_expenses) - Math.abs(prevMonth.expenses)) / Math.abs(prevMonth.expenses)) * 100
+    expensesChange = prevMonth?.expenses !== 0
+      ? ((Math.abs(data.monthly_expenses ?? 0) - Math.abs(prevMonth?.expenses ?? 0)) / Math.abs(prevMonth?.expenses ?? 1)) * 100
       : 0
   }
 
