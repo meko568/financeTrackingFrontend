@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = useAuthStore((state) => state.token)
 
   if (!token) {
