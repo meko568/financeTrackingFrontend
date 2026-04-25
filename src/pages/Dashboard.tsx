@@ -19,16 +19,22 @@ const Dashboard = () => {
   const { formatCurrency } = useCurrency()
 
   // Calculate percentage changes from last_6_months data
-  const last6Months = data?.last_6_months
-  const balanceChange = last6Months && last6Months.length > 1 && data
-    ? ((data.total_balance - (data.total_balance - last6Months[last6Months.length - 2].income + last6Months[last6Months.length - 2].expenses)) / Math.abs(data.total_balance)) * 100
-    : 0
-  const incomeChange = last6Months && last6Months.length > 1 && data
-    ? ((data.monthly_income - last6Months[last6Months.length - 2].income) / Math.abs(last6Months[last6Months.length - 2].income)) * 100
-    : 0
-  const expensesChange = last6Months && last6Months.length > 1 && data
-    ? ((Math.abs(data.monthly_expenses) - Math.abs(last6Months[last6Months.length - 2].expenses)) / Math.abs(last6Months[last6Months.length - 2].expenses)) * 100
-    : 0
+  let balanceChange = 0
+  let incomeChange = 0
+  let expensesChange = 0
+
+  if (data && data.last_6_months && data.last_6_months.length > 1) {
+    const prevMonth = data.last_6_months[data.last_6_months.length - 2]
+    balanceChange = data.total_balance !== 0
+      ? ((data.total_balance - (data.total_balance - prevMonth.income + prevMonth.expenses)) / Math.abs(data.total_balance)) * 100
+      : 0
+    incomeChange = prevMonth.income !== 0
+      ? ((data.monthly_income - prevMonth.income) / Math.abs(prevMonth.income)) * 100
+      : 0
+    expensesChange = prevMonth.expenses !== 0
+      ? ((Math.abs(data.monthly_expenses) - Math.abs(prevMonth.expenses)) / Math.abs(prevMonth.expenses)) * 100
+      : 0
+  }
 
   const barData = data?.last_6_months?.map(m => ({
     month: m.month,
