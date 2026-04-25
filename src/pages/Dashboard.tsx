@@ -19,13 +19,13 @@ const Dashboard = () => {
   const { formatCurrency } = useCurrency()
 
   // Calculate percentage changes from last_6_months data
-  const balanceChange = data?.last_6_months?.length > 1
+  const balanceChange = data && data.last_6_months && data.last_6_months.length > 1
     ? ((data.total_balance - (data.total_balance - data.last_6_months[data.last_6_months.length - 2].income + data.last_6_months[data.last_6_months.length - 2].expenses)) / Math.abs(data.total_balance)) * 100
     : 0
-  const incomeChange = data?.last_6_months?.length > 1
+  const incomeChange = data && data.last_6_months && data.last_6_months.length > 1
     ? ((data.monthly_income - data.last_6_months[data.last_6_months.length - 2].income) / Math.abs(data.last_6_months[data.last_6_months.length - 2].income)) * 100
     : 0
-  const expensesChange = data?.last_6_months?.length > 1
+  const expensesChange = data && data.last_6_months && data.last_6_months.length > 1
     ? ((Math.abs(data.monthly_expenses) - Math.abs(data.last_6_months[data.last_6_months.length - 2].expenses)) / Math.abs(data.last_6_months[data.last_6_months.length - 2].expenses)) * 100
     : 0
 
