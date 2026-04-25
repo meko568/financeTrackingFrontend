@@ -1,72 +1,39 @@
-import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import {
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Tooltip,
-  CartesianGrid,
   XAxis,
   Legend,
 } from 'recharts'
 import { useDashboardSummary } from '../hooks/useDashboard'
 import { useCurrency } from '../hooks/useCurrency'
 
-const categoryColors = ['#7C3AED', '#10B981', '#F43F5E', '#0EA5E9', '#F59E0B']
-
-const Sparkline = ({ data }: { data: number[] }) => (
-  <ResponsiveContainer width="100%" height={48}>
-    <LineChart data={data.map((value) => ({ value }))}>
-      <Line type="monotone" dataKey="value" stroke="#8B5CF6" strokeWidth={2.5} dot={false} />
-    </LineChart>
-  </ResponsiveContainer>
-)
+const categoryColors = ['#006666', '#00A63D', '#FF2157', '#FE9900', '#006666']
 
 const Dashboard = () => {
-  const { t } = useTranslation()
   const { data, loading } = useDashboardSummary()
   const { formatCurrency } = useCurrency()
 
-  // Calculate trends from last_6_months data
-  const incomeTrend = data?.last_6_months?.map(m => m.income) ?? []
-  const expensesTrend = data?.last_6_months?.map(m => m.expenses) ?? []
+  // Calculate percentage changes from last_6_months data
+  const balanceChange = data?.last_6_months?.length > 1
+    ? ((data.total_balance - (data.total_balance - data.last_6_months[data.last_6_months.length - 2].income + data.last_6_months[data.last_6_months.length - 2].expenses)) / Math.abs(data.total_balance)) * 100
+    : 0
+  const incomeChange = data?.last_6_months?.length > 1
+    ? ((data.monthly_income - data.last_6_months[data.last_6_months.length - 2].income) / Math.abs(data.last_6_months[data.last_6_months.length - 2].income)) * 100
+    : 0
+  const expensesChange = data?.last_6_months?.length > 1
+    ? ((Math.abs(data.monthly_expenses) - Math.abs(data.last_6_months[data.last_6_months.length - 2].expenses)) / Math.abs(data.last_6_months[data.last_6_months.length - 2].expenses)) * 100
+    : 0
 
-  // Calculate balance trend (cumulative income - expenses)
-  const balanceTrend = data?.last_6_months?.reduce((acc, month, index) => {
-    const runningBalance = (acc[index - 1] || 0) + month.income - month.expenses
-    return [...acc, runningBalance]
-  }, [] as number[]) ?? []
-
-  const summaryCards = [
-    {
-      title: t('dashboard.total_balance'),
-      value: data ? formatCurrency(data.total_balance) : '—',
-      meta: t('dashboard.meta_net_position'),
-      color: 'from-violet via-violet/90 to-emerald',
-      trend: balanceTrend.length > 0 ? balanceTrend : [0, 0, 0, 0, 0, 0],
-    },
-    {
-      title: t('dashboard.monthly_income'),
-      value: data ? formatCurrency(data.monthly_income) : '—',
-      meta: t('dashboard.this_month'),
-      color: 'from-emerald via-emerald/90 to-cyan-400',
-      trend: incomeTrend.length > 0 ? incomeTrend : [0, 0, 0, 0, 0, 0],
-    },
-    {
-      title: t('dashboard.monthly_expenses'),
-      value: data ? formatCurrency(Math.abs(data.monthly_expenses)) : '—',
-      meta: t('dashboard.this_month'),
-      color: 'from-rose via-rose/90 to-pink-500',
-      trend: expensesTrend.length > 0 ? expensesTrend : [0, 0, 0, 0, 0, 0],
-    },
-  ]
-
-  const areaData = data?.last_6_months ?? []
+  const barData = data?.last_6_months?.map(m => ({
+    month: m.month,
+    income: m.income,
+    expenses: Math.abs(m.expenses),
+  })) ?? []
 
   const categoryData = data?.top_categories.length
     ? data.top_categories.map((entry) => ({ name: entry.category ?? 'Unknown', value: entry.amount }))
@@ -74,174 +41,184 @@ const Dashboard = () => {
 
   const recentTransactions = data?.recent_transactions ?? []
 
+  const budgetData = [] // TODO: Add budget data when available
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="space-y-6"
-    >
-      <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('dashboard.greeting')}</p>
-            <h2 className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{t('auth.welcome_back')}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
-              {loading ? t('common.loading') : t('dashboard.summary_ready')}
-            </p>
+    <div className="min-h-screen pb-24 px-4 py-6">
+      {/* Header */}
+      <header className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="neu-raised flex h-12 w-12 items-center justify-center text-2xl">
+            💰
           </div>
-          <div className="inline-flex items-center gap-3 rounded-3xl bg-slate-100 dark:bg-white/5 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 shadow-inner">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-violet/10 text-violet">📈</span>
-            <div>
-              <p className="font-semibold text-slate-900 dark:text-white">{t('dashboard.ai_forecast')}</p>
-              <p className="text-slate-500 dark:text-slate-400">{t('dashboard.updated_ago')}</p>
-            </div>
+          <h1 className="text-xl font-bold">FinanceTracker</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="neu-flat flex h-10 w-10 items-center justify-center text-lg">
+            ⚙️
+          </button>
+        </div>
+      </header>
+
+      {/* Stats Row */}
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
+        <div className="neu-raised p-6">
+          <p className="mb-2 text-sm text-secondary">Total Balance</p>
+          <p className="mb-3 text-2xl font-bold">{loading ? '—' : formatCurrency(data?.total_balance ?? 0)}</p>
+          <span className={`neu-badge ${balanceChange >= 0 ? 'success' : 'danger'}`}>
+            {balanceChange >= 0 ? '+' : ''}{balanceChange.toFixed(1)}%
+          </span>
+        </div>
+        <div className="neu-raised p-6">
+          <p className="mb-2 text-sm text-secondary">Income</p>
+          <p className="mb-3 text-2xl font-bold">{loading ? '—' : formatCurrency(data?.monthly_income ?? 0)}</p>
+          <span className={`neu-badge ${incomeChange >= 0 ? 'success' : 'danger'}`}>
+            {incomeChange >= 0 ? '+' : ''}{incomeChange.toFixed(1)}%
+          </span>
+        </div>
+        <div className="neu-raised p-6">
+          <p className="mb-2 text-sm text-secondary">Expenses</p>
+          <p className="mb-3 text-2xl font-bold">{loading ? '—' : formatCurrency(Math.abs(data?.monthly_expenses ?? 0))}</p>
+          <span className={`neu-badge ${expensesChange <= 0 ? 'success' : 'danger'}`}>
+            {expensesChange >= 0 ? '+' : ''}{expensesChange.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Middle Grid */}
+      <div className="mb-8 grid gap-6 lg:grid-cols-2">
+        {/* Bar Chart */}
+        <div className="neu-raised p-6">
+          <h3 className="mb-4 text-lg font-semibold">6-Month Spending</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <XAxis dataKey="month" tick={{ fill: '#666666', fontSize: 12 }} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#E7E5E4',
+                    border: 'none',
+                    boxShadow: '4px 4px 8px #c8c5c3, -4px -4px 8px #ffffff',
+                    borderRadius: '10px'
+                  }}
+                  itemStyle={{ color: '#2d2d2d' }}
+                  labelStyle={{ color: '#666666' }}
+                />
+                <Bar dataKey="income" fill="#006666" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expenses" fill="#FF2157" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Donut Chart */}
+        <div className="neu-raised p-6">
+          <h3 className="mb-4 text-lg font-semibold">Spending Categories</h3>
+          <div className="flex h-64 items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={entry.name} fill={categoryColors[index % categoryColors.length]} />
+                  ))}
+                </Pie>
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 11, color: '#666666' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#E7E5E4',
+                    border: 'none',
+                    boxShadow: '4px 4px 8px #c8c5c3, -4px -4px 8px #ffffff',
+                    borderRadius: '10px'
+                  }}
+                  itemStyle={{ color: '#2d2d2d' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6">
-        <div className="space-y-6">
-          <div className="grid gap-5 md:grid-cols-2">
-            {summaryCards.map((card) => (
-              <div key={card.title} className="rounded-[28px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-5 shadow-glass backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet/30">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-500">{card.title}</p>
-                    <p className="mt-4 text-3xl font-semibold text-slate-900 dark:text-white">{loading ? '—' : card.value}</p>
+      {/* Bottom Grid */}
+      <div className="mb-8 grid gap-6 lg:grid-cols-2">
+        {/* Recent Transactions */}
+        <div className="neu-raised p-6">
+          <h3 className="mb-4 text-lg font-semibold">Recent Transactions</h3>
+          <div className="space-y-3">
+            {recentTransactions.slice(0, 5).map((item) => (
+              <div key={item.id} className="neu-inset flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white text-sm">
+                    {item.icon || '💳'}
                   </div>
-                  <div className={`rounded-3xl bg-gradient-to-br ${card.color} px-3 py-2 text-xs font-semibold text-white shadow-[0_16px_30px_rgba(124,58,237,0.15)]`}>
-                    {card.meta}
+                  <div>
+                    <p className="text-sm font-medium">{item.description || item.category}</p>
+                    <p className="text-xs text-secondary">{item.date}</p>
                   </div>
                 </div>
-                <div className="mt-4 h-12">
-                  <Sparkline data={card.trend} />
+                <p className={`text-sm font-semibold ${item.amount > 0 ? 'text-success' : 'text-danger'}`}>
+                  {item.amount > 0 ? `+${formatCurrency(item.amount)}` : formatCurrency(item.amount)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Budget Categories */}
+        <div className="neu-raised p-6">
+          <h3 className="mb-4 text-lg font-semibold">Budget Categories</h3>
+          <div className="space-y-4">
+            {budgetData.map((budget: any) => (
+              <div key={budget.id} className="neu-inset p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">{budget.category}</span>
+                  <span className="text-xs text-secondary">{formatCurrency(budget.spent)} / {formatCurrency(budget.limit)}</span>
+                </div>
+                <div className="neu-progress">
+                  <div
+                    className={`neu-progress-bar ${budget.spent > budget.limit ? 'danger' : budget.spent > budget.limit * 0.8 ? 'warning' : 'success'}`}
+                    style={{ width: `${Math.min((budget.spent / budget.limit) * 100, 100)}%` }}
+                  />
                 </div>
               </div>
             ))}
           </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
-            <section className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">{t('dashboard.cash_flow')}</p>
-                  <h3 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">{t('dashboard.income_vs_expenses')}</h3>
-                </div>
-                <div className="rounded-3xl border border-violet/20 bg-violet/10 px-4 py-2 text-sm text-violet">{t('dashboard.last_6_months')}</div>
-              </div>
-
-              <div className="mt-8 h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={areaData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="#F43F5E" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="#1f2937" opacity={0.4} vertical={false} />
-                    <XAxis dataKey="month" stroke="#718096" tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{ background: '#111827', borderColor: '#334155' }} labelStyle={{ color: '#cbd5e1' }} itemStyle={{ color: '#f8fafc' }} />
-                    <Area type="monotone" dataKey="income" stroke="#10B981" fill="url(#incomeGradient)" strokeWidth={3} />
-                    <Area type="monotone" dataKey="expenses" stroke="#F43F5E" fill="url(#expenseGradient)" strokeWidth={3} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-
-            <aside className="space-y-6">
-              <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('dashboard.recent_transactions')}</p>
-                    <h3 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">{t('dashboard.last_5')}</h3>
-                  </div>
-                  <span className="rounded-3xl bg-slate-200 dark:bg-slate-900/70 px-3 py-2 text-xs uppercase tracking-[0.25em] text-slate-600 dark:text-slate-400">Live</span>
-                </div>
-                <div className="mt-6 space-y-4">
-                  {recentTransactions.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-2xl bg-slate-200 dark:bg-slate-800/80 p-3 text-lg">{item.icon || '•'}</div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.description || item.category}</p>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">{item.category} • {item.date}</p>
-                        </div>
-                      </div>
-                      <p className={`text-sm font-semibold ${item.amount > 0 ? 'text-emerald' : 'text-rose'}`}>
-                        {item.amount > 0 ? `+${formatCurrency(item.amount)}` : `-${formatCurrency(Math.abs(item.amount))}`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-gradient-to-br from-slate-100 dark:from-slate-900/80 dark:via-slate-950/90 dark:to-violet/20 p-6 shadow-glass backdrop-blur-xl text-slate-900 dark:text-slate-100">
-                <p className="text-sm uppercase tracking-[0.3em] text-violet-600 dark:text-violet-200">{t('dashboard.ai_insight')}</p>
-                <h3 className="mt-4 text-xl font-semibold">{t('dashboard.smart_spending_tip')}</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {t('dashboard.spending_tip_desc')}
-                </p>
-                <div className="mt-6 rounded-3xl bg-white dark:bg-slate-950/80 p-4 text-sm text-slate-700 dark:text-slate-300">
-                  <p><span className="font-semibold text-slate-900 dark:text-white">{t('dashboard.next_prediction')}:</span> {t('dashboard.prediction_value', { amount: formatCurrency(1820) })}</p>
-                </div>
-              </div>
-            </aside>
-          </div>
-
-          <section className="grid gap-6 xl:grid-cols-[0.9fr_0.7fr]">
-            <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('dashboard.expense_mix')}</p>
-                  <h3 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">{t('dashboard.category_breakdown')}</h3>
-                </div>
-                <span className="rounded-3xl bg-slate-100 dark:bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.25em] text-slate-600 dark:text-slate-300">{t('dashboard.monthly')}</span>
-              </div>
-
-              <div className="mt-8 flex min-h-[300px] items-center justify-center">
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie data={categoryData} cx="50%" cy="50%" innerRadius={75} outerRadius={110} paddingAngle={4} dataKey="value">
-                      {categoryData.map((entry, index) => (
-                        <Cell key={entry.name} fill={categoryColors[index % categoryColors.length]} />
-                      ))}
-                    </Pie>
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ color: '#cbd5e1', fontSize: 12 }} />
-                    <Tooltip contentStyle={{ background: '#0f172a', borderColor: '#334155' }} itemStyle={{ color: '#fff' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-              <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('dashboard.category_insights')}</p>
-              <div className="mt-6 space-y-5">
-                {categoryData.map((cat) => (
-                  <div key={cat.name} className="space-y-2 rounded-3xl bg-slate-100 dark:bg-white/5 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{cat.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-500">{cat.value}% {t('dashboard.of_expenses')}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{Math.round(cat.value)}%</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-300 dark:bg-slate-800">
-                      <div className="h-full rounded-full bg-gradient-to-r from-violet to-emerald" style={{ width: `${Math.min(cat.value, 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
         </div>
       </div>
-    </motion.div>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 neu-raised px-6 py-4">
+        <div className="flex items-center gap-6">
+          <button className="neu-flat flex h-12 w-12 items-center justify-center text-xl">
+            🏠
+          </button>
+          <button className="neu-flat flex h-12 w-12 items-center justify-center text-xl">
+            📊
+          </button>
+          <button className="btn-primary flex h-14 w-14 items-center justify-center text-2xl rounded-full">
+            +
+          </button>
+          <button className="neu-flat flex h-12 w-12 items-center justify-center text-xl">
+            💳
+          </button>
+          <button className="neu-flat flex h-12 w-12 items-center justify-center text-xl">
+            👤
+          </button>
+        </div>
+      </nav>
+    </div>
   )
 }
 
