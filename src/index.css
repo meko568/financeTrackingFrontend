@@ -2,15 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  color-scheme: dark;
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Space Mono', monospace;
   font-size: 16px;
   line-height: 1.5;
-  color: #e2e8f0;
-  background: #0F172A;
 }
 
 * {
@@ -24,8 +21,6 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: radial-gradient(circle at top, rgba(124, 58, 237, 0.17), transparent 35%), #0F172A;
-  color: #e2e8f0;
 }
 
 #root {
@@ -40,12 +35,6 @@ select {
 }
 
 ::selection {
-  background: rgba(124, 58, 237, 0.35);
+  background: rgba(0, 102, 102, 0.35);
   color: #fff;
-}
-
-.bg-glass {
-  background: rgba(15, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px);
 }

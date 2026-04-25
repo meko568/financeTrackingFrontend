@@ -75,45 +75,45 @@ const AIAssistant = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className="min-h-screen pb-24 px-4 py-6 space-y-6"
     >
-      <div className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
-        <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('nav.ai_assistant')}</p>
-        <h1 className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{t('ai.subtitle')}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-400">
+      <div className="neu-raised p-6">
+        <p className="text-sm uppercase tracking-[0.28em] text-secondary">{t('nav.ai_assistant')}</p>
+        <h1 className="mt-3 text-3xl font-semibold">{t('ai.subtitle')}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-secondary">
           {t('ai.description')}
         </p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.55fr_0.95fr]">
-        <section className="rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
+        <section className="neu-raised p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('nav.ai_assistant')}</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{t('ai.chat_title')}</h2>
+              <p className="text-sm uppercase tracking-[0.28em] text-secondary">{t('nav.ai_assistant')}</p>
+              <h2 className="mt-2 text-2xl font-semibold">{t('ai.chat_title')}</h2>
             </div>
-            <span className="rounded-3xl bg-slate-200 dark:bg-slate-900/80 px-4 py-2 text-sm text-slate-700 dark:text-slate-300">AI</span>
+            <span className="neu-badge px-4 py-2 text-sm">AI</span>
           </div>
 
           <div className="mt-6 space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`rounded-3xl p-5 ${message.author === 'ai' ? 'bg-slate-100 dark:bg-slate-950/80 text-slate-700 dark:text-slate-200' : 'bg-violet/10 text-slate-100 self-end'} ${message.author === 'user' ? 'ml-auto max-w-xl' : 'max-w-2xl'}`}
+                className={`neu-inset p-5 ${message.author === 'user' ? 'ml-auto max-w-xl' : 'max-w-2xl'}`}
               >
                 <p className="text-sm leading-7">{message.text}</p>
               </div>
             ))}
             {aiLoading && (
-              <div className="rounded-3xl bg-slate-100 dark:bg-slate-950/80 p-5 max-w-2xl">
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('ai.thinking')}</p>
+              <div className="neu-inset p-5 max-w-2xl">
+                <p className="text-sm text-secondary">{t('ai.thinking')}</p>
               </div>
             )}
           </div>
 
-          <div className="mt-6 rounded-[28px] border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-950/80 p-4">
-            <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-500">System prompt</p>
-            <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">
+          <div className="mt-6 neu-inset p-4">
+            <p className="text-xs uppercase tracking-[0.28em] text-secondary">System prompt</p>
+            <p className="mt-3 text-sm">
               {t('ai.system_prompt')}
             </p>
           </div>
@@ -129,37 +129,37 @@ const AIAssistant = () => {
                 }
               }}
               placeholder={t('ai.placeholder')}
-              className="min-h-[140px] rounded-3xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900/80 px-4 py-4 text-slate-900 dark:text-slate-100 outline-none"
+              className="neu-input min-h-[140px]"
             />
             <button
               onClick={handleSend}
               disabled={aiLoading}
-              className="rounded-3xl bg-emerald px-5 py-4 text-sm font-semibold text-slate-950 transition hover:brightness-105 disabled:opacity-50"
+              className="btn-primary px-5 py-4 text-sm font-semibold disabled:opacity-50"
             >
               {aiLoading ? t('ai.sending') : t('ai.send')}
             </button>
           </div>
         </section>
 
-        <aside className="space-y-6 rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-surface p-6 shadow-glass backdrop-blur-xl">
+        <aside className="neu-raised p-6 space-y-6">
           <div>
-            <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('ai.insights')}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{t('ai.monthly_analysis')}</h2>
+            <p className="text-sm uppercase tracking-[0.28em] text-secondary">{t('ai.insights')}</p>
+            <h2 className="mt-2 text-2xl font-semibold">{t('ai.monthly_analysis')}</h2>
           </div>
           <div className="space-y-4">
             {insights.map((item) => (
-              <div key={item.label} className="rounded-3xl bg-slate-100 dark:bg-slate-950/80 p-4">
-                <p className="text-sm uppercase tracking-[0.22em] text-slate-500 dark:text-slate-500">{item.label}</p>
-                <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">{item.value}</p>
+              <div key={item.label} className="neu-inset p-4">
+                <p className="text-sm uppercase tracking-[0.22em] text-secondary">{item.label}</p>
+                <p className="mt-3 text-sm leading-7">{item.value}</p>
               </div>
             ))}
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-violet/15 via-slate-100 dark:via-slate-950/80 dark:to-slate-900 p-5">
-            <p className="text-sm uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">{t('ai.predicted_balance')}</p>
-            <p className="mt-4 text-3xl font-semibold text-slate-900 dark:text-white">
+          <div className="neu-raised p-5">
+            <p className="text-sm uppercase tracking-[0.28em] text-secondary">{t('ai.predicted_balance')}</p>
+            <p className="mt-4 text-3xl font-semibold">
               {dataLoading ? '...' : formatCurrency(projectedBalance)}
             </p>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('ai.prediction_desc')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('ai.prediction_desc')}</p>
           </div>
         </aside>
       </div>

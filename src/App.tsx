@@ -58,7 +58,7 @@ function App() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen text-slate-900 dark:bg-navy dark:text-slate-100">
+      <div className="min-h-screen">
         <MobileNav />
         <div className={`mx-auto flex min-h-screen max-w-[1720px] gap-6 px-4 py-5 xl:px-8 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}>
           {!hideSidebar && <Sidebar />}
