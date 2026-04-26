@@ -29,8 +29,8 @@ const Reports = () => {
     doc.text(`Total Revenue: ${formatCurrency(totalRevenue)}`, 20, 45)
 
     // Total Expenses
-    const totalExpensesSum = monthlyData.reduce((sum, d) => sum + d.expenses, 0)
-    doc.text(`Total Expenses: ${formatCurrency(Math.abs(totalExpensesSum))}`, 20, 55)
+    const totalExpensesSum = monthlyData.reduce((sum, d) => sum + Math.abs(d.expenses), 0)
+    doc.text(`Total Expenses: ${formatCurrency(totalExpensesSum)}`, 20, 55)
 
     // Net Margin
     const netMargin = totalRevenue > 0 ? `${Math.round((totalRevenue - totalExpensesSum) / totalRevenue * 100)}%` : '0%'
