@@ -89,7 +89,8 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
-                  className="neu-input pr-12"
+                  className="neu-input"
+                  style={{ paddingRight: '40px' }}
                   required
                 />
                 <button
@@ -109,7 +110,8 @@ const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm"
-                  className="neu-input pr-12"
+                  className="neu-input"
+                  style={{ paddingRight: '40px' }}
                   required
                 />
                 <button

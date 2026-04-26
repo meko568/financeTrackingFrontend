@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import { useReports } from '../hooks/useReports'
 import { useCurrency } from '../hooks/useCurrency'
+import jsPDF from 'jspdf'
 
 const pieColors = ['#006666', '#00A63D', '#FF2157', '#FE9900', '#006666']
 
@@ -10,6 +11,53 @@ const Reports = () => {
   const { t } = useTranslation()
   const { formatCurrency } = useCurrency()
   const { monthlyData, categoryData, loading } = useReports()
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF()
+
+    // Title
+    doc.setFontSize(20)
+    doc.text('Financial Report', 20, 20)
+
+    // Date range
+    doc.setFontSize(12)
+    const dateRange = `${monthlyData[0]?.month || ''} - ${monthlyData[monthlyData.length - 1]?.month || ''}`
+    doc.text(`Period: ${dateRange}`, 20, 30)
+
+    // Total Revenue
+    const totalRevenue = monthlyData.reduce((sum, d) => sum + d.income, 0)
+    doc.text(`Total Revenue: ${formatCurrency(totalRevenue)}`, 20, 45)
+
+    // Total Expenses
+    const totalExpensesSum = monthlyData.reduce((sum, d) => sum + d.expenses, 0)
+    doc.text(`Total Expenses: ${formatCurrency(Math.abs(totalExpensesSum))}`, 20, 55)
+
+    // Net Margin
+    const netMargin = totalRevenue > 0 ? `${Math.round((totalRevenue - totalExpensesSum) / totalRevenue * 100)}%` : '0%'
+    doc.text(`Net Margin: ${netMargin}`, 20, 65)
+
+    // Category Breakdown
+    doc.setFontSize(14)
+    doc.text('Category Breakdown', 20, 85)
+    doc.setFontSize(10)
+
+    const totalExpenses = categoryData.reduce((sum, c) => sum + c.amount, 0)
+    categoryData.forEach((cat, index) => {
+      const percentage = totalExpenses > 0 ? Math.round((cat.amount / totalExpenses) * 100) : 0
+      doc.text(`${cat.category || 'Other'}: ${formatCurrency(cat.amount)} (${percentage}%)`, 20, 95 + (index * 8))
+    })
+
+    // Monthly Breakdown
+    doc.setFontSize(14)
+    doc.text('Monthly Breakdown', 20, 95 + (categoryData.length * 8) + 10)
+    doc.setFontSize(10)
+
+    monthlyData.forEach((month, index) => {
+      doc.text(`${month.month}: Income ${formatCurrency(month.income)}, Expenses ${formatCurrency(Math.abs(month.expenses))}`, 20, 105 + (categoryData.length * 8) + 20 + (index * 8))
+    })
+
+    doc.save('financial-report.pdf')
+  }
 
   const barData = monthlyData.map(d => ({
     month: d.month,
@@ -81,7 +129,7 @@ const Reports = () => {
               <p className="text-sm uppercase tracking-[0.28em] text-secondary">{t('reports.category_share')}</p>
               <h2 className="mt-2 text-2xl font-semibold">{t('reports.pie_breakdown')}</h2>
             </div>
-            <button className="btn-primary px-4 py-2 text-sm font-semibold">
+            <button onClick={handleDownloadPDF} className="btn-primary px-4 py-2 text-sm font-semibold">
               {t('reports.download_pdf')}
             </button>
           </div>

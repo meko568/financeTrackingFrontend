@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { useDashboardSummary } from '../hooks/useDashboard'
 import { useCurrency } from '../hooks/useCurrency'
+import { Link } from 'react-router-dom'
 
 const categoryColors = ['#006666', '#00A63D', '#FF2157', '#FE9900', '#006666']
 
@@ -23,9 +24,10 @@ const Dashboard = () => {
 
   const balanceChange: number = (() => {
     if (!data || !prevMonth) return 0
-    const diff = (prevMonth.income ?? 0) - Math.abs(prevMonth.expenses ?? 0)
-    return data.total_balance !== 0
-      ? (diff / Math.abs(data.total_balance)) * 100
+    const currentNet = (data.monthly_income ?? 0) - Math.abs(data.monthly_expenses ?? 0)
+    const prevNet = (prevMonth.income ?? 0) - Math.abs(prevMonth.expenses ?? 0)
+    return prevNet !== 0
+      ? ((currentNet - prevNet) / Math.abs(prevNet)) * 100
       : 0
   })()
 
@@ -75,9 +77,9 @@ const Dashboard = () => {
           <h1 className="text-xl font-bold">FinanceTracker</h1>
         </div>
         <div className="flex items-center gap-3">
-          <button className="neu-flat flex h-10 w-10 items-center justify-center text-lg">
+          <Link to="/settings" className="neu-flat flex h-10 w-10 items-center justify-center text-lg">
             ⚙️
-          </button>
+          </Link>
         </div>
       </header>
 

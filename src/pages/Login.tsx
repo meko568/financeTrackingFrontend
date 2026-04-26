@@ -62,7 +62,8 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="neu-input pr-12"
+                className="neu-input"
+                style={{ paddingRight: '40px' }}
                 required
               />
               <button
