@@ -16,6 +16,9 @@ const Transactions = () => {
     transaction_date: '',
     description: '',
     notes: '',
+    is_recurring: false,
+    recurring_frequency: '' as 'daily' | 'weekly' | 'monthly' | 'yearly' | '',
+    recurring_end_date: '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -124,7 +127,14 @@ const Transactions = () => {
                     {tx.category?.icon || '💳'}
                   </div>
                   <div>
-                    <p className="font-medium">{tx.description || tx.category?.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{tx.description || tx.category?.name}</p>
+                      {tx.is_recurring && (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary font-medium">
+                          🔄 {tx.recurring_frequency}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-secondary">{tx.transaction_date} • {tx.category?.name}</p>
                   </div>
                 </div>
@@ -167,9 +177,12 @@ const Transactions = () => {
                     description: form.description || undefined,
                     notes: form.notes || undefined,
                     transaction_date: form.transaction_date,
+                    is_recurring: form.is_recurring,
+                    recurring_frequency: form.is_recurring ? form.recurring_frequency || null : null,
+                    recurring_end_date: form.is_recurring && form.recurring_end_date ? form.recurring_end_date : null,
                   })
                   setShowModal(false)
-                  setForm({ amount: '', type: 'expense', category_id: '', transaction_date: '', description: '', notes: '' })
+                  setForm({ amount: '', type: 'expense', category_id: '', transaction_date: '', description: '', notes: '', is_recurring: false, recurring_frequency: '', recurring_end_date: '' })
                   refetch()
                 } catch {
                   // error handled by hook
@@ -231,6 +244,38 @@ const Transactions = () => {
                 onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 className="neu-input"
               />
+              <label className="flex cursor-pointer items-center gap-3 neu-raised p-3">
+                <input
+                  type="checkbox"
+                  checked={form.is_recurring}
+                  onChange={(e) => setForm((f) => ({ ...f, is_recurring: e.target.checked }))}
+                  className="h-5 w-5 accent-primary"
+                />
+                <span className="font-medium">Is Recurring?</span>
+              </label>
+              {form.is_recurring && (
+                <>
+                  <select
+                    value={form.recurring_frequency}
+                    onChange={(e) => setForm((f) => ({ ...f, recurring_frequency: e.target.value as typeof f.recurring_frequency }))}
+                    required={form.is_recurring}
+                    className="neu-input"
+                  >
+                    <option value="">Select Frequency</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                  <input
+                    type="date"
+                    placeholder="End Date (optional)"
+                    value={form.recurring_end_date}
+                    onChange={(e) => setForm((f) => ({ ...f, recurring_end_date: e.target.value }))}
+                    className="neu-input"
+                  />
+                </>
+              )}
               <div className="flex justify-end gap-3">
                 <button
                   type="button"

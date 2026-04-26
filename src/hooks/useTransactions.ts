@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api/axios'
+import { useAppStore } from '../store/appStore'
 
 export type Transaction = {
     id: number
@@ -7,6 +8,10 @@ export type Transaction = {
     amount: number
     type: 'income' | 'expense'
     transaction_date: string
+    is_recurring: boolean
+    recurring_frequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+    recurring_end_date: string | null
+    next_due_date: string | null
     category: {
         id: number
         name: string
@@ -68,6 +73,8 @@ export const useTransactions = (filters?: TransactionFilters) => {
         fetchTransactions()
     }, [filters?.type, filters?.category_id, filters?.month, filters?.year, filters?.date_from, filters?.date_to])
 
+    const notifyTransactionCreated = useAppStore((state) => state.notifyTransactionCreated)
+
     const createTransaction = async (payload: {
         category_id: number
         amount: number
@@ -76,9 +83,11 @@ export const useTransactions = (filters?: TransactionFilters) => {
         notes?: string
         transaction_date: string
         is_recurring?: boolean
-        recurring_interval?: 'daily' | 'weekly' | 'monthly'
+        recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+        recurring_end_date?: string | null
     }) => {
         const response = await api.post('/transactions', payload)
+        notifyTransactionCreated()
         return response.data
     }
 

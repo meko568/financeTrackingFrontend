@@ -11,13 +11,35 @@ import {
 } from 'recharts'
 import { useDashboardSummary } from '../hooks/useDashboard'
 import { useCurrency } from '../hooks/useCurrency'
+import { useBudget } from '../hooks/useBudget'
+import { useBudgetAlerts } from '../hooks/useBudgetAlerts'
+import useToast from '../hooks/useToast'
 import { Link } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
 
 const categoryColors = ['#006666', '#00A63D', '#FF2157', '#FE9900', '#006666']
 
 const Dashboard = () => {
   const { data, loading } = useDashboardSummary()
   const { formatCurrency } = useCurrency()
+  const { budgets } = useBudget()
+  const { alerts } = useBudgetAlerts()
+  const pushToast = useToast()
+  const shownAlertIds = useRef<Set<string>>(new Set())
+
+  useEffect(() => {
+    alerts.forEach((alert) => {
+      const key = `${alert.budget_id}-${alert.alert_level}`
+      if (shownAlertIds.current.has(key)) return
+      shownAlertIds.current.add(key)
+
+      if (alert.alert_level === 'danger') {
+        pushToast(`🚨 You've exceeded your ${alert.category_name} budget!`, 'error')
+      } else if (alert.alert_level === 'warning') {
+        pushToast(`⚠️ You've used 80% of your ${alert.category_name} budget`, 'warning')
+      }
+    })
+  }, [alerts, pushToast])
 
   const months = data?.last_6_months ?? []
   const prevMonth = months.length > 1 ? months[months.length - 2] : null
@@ -59,12 +81,12 @@ const Dashboard = () => {
 
   const recentTransactions = data?.recent_transactions ?? []
 
-  const budgetData: {
-    id: string
-    category: string
-    spent: number
-    limit: number
-  }[] = []
+  const budgetData = budgets.map((b) => ({
+    id: String(b.budget.id),
+    category: b.budget.category.name,
+    spent: Math.abs(b.spent),
+    limit: b.budget.amount,
+  }))
 
   return (
     <div className="min-h-screen pb-24 px-4 py-6">
@@ -173,6 +195,36 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Budget Alerts */}
+      {alerts.length > 0 && (
+        <div className="mb-8 neu-raised p-6">
+          <h3 className="mb-4 text-lg font-semibold">Budget Alerts</h3>
+          <div className="space-y-4">
+            {alerts.map((alert) => (
+              <div key={alert.budget_id} className="neu-inset p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {alert.category_icon} {alert.category_name}
+                  </span>
+                  <span className={`text-xs font-semibold ${alert.alert_level === 'danger' ? 'text-danger' : 'text-amber-600'}`}>
+                    {alert.alert_level === 'danger' ? 'EXCEEDED' : 'WARNING'} — {alert.percentage_used.toFixed(0)}%
+                  </span>
+                </div>
+                <div className="neu-progress">
+                  <div
+                    className={`neu-progress-bar ${alert.alert_level === 'danger' ? 'danger' : 'warning'}`}
+                    style={{ width: `${Math.min(alert.percentage_used, 100)}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-secondary">
+                  {formatCurrency(alert.amount_spent)} / {formatCurrency(alert.budget_limit)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bottom Grid */}
       <div className="mb-8 grid gap-6 lg:grid-cols-2">

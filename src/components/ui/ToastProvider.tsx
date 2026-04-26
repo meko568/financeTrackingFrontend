@@ -4,7 +4,7 @@ import { useLanguage } from '../../hooks/useLanguage'
 type Toast = {
   id: number
   message: string
-  type: 'success' | 'error' | 'info'
+  type: 'success' | 'error' | 'info' | 'warning'
 }
 
 type ToastContextValue = {
@@ -36,9 +36,11 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
           <div
             key={toast.id}
             className={`rounded-3xl border p-4 shadow-xl transition ${toast.type === 'success'
-                ? 'border-emerald/30 bg-emerald/10 text-emerald'
-                : toast.type === 'error'
-                  ? 'border-rose/30 bg-rose/10 text-rose'
+              ? 'border-emerald/30 bg-emerald/10 text-emerald'
+              : toast.type === 'error'
+                ? 'border-rose/30 bg-rose/10 text-rose'
+                : toast.type === 'warning'
+                  ? 'border-amber-500/30 bg-amber-500/10 text-amber-600'
                   : 'border-slate-600 bg-slate-950/95 text-slate-100'
               }`}
           >
