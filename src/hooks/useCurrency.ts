@@ -14,7 +14,7 @@ export const useCurrency = () => {
       return new Intl.NumberFormat(targetLocale, {
         style: 'currency',
         currency,
-      }).format(Math.abs(amount))
+      }).format(amount)
     },
     [currency, i18n.language]
   )
