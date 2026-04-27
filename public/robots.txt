@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://finance-tracking-frontend-three.vercel.app/sitemap.xml

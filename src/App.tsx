@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
 import { ToastProvider } from './components/ui/ToastProvider'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
@@ -58,6 +59,20 @@ function App() {
 
   return (
     <ToastProvider>
+      <Helmet>
+        <title>Finance Tracker – Track Your Income & Expenses</title>
+        <meta name="description" content="Track your income, expenses and budget easily with Finance Tracker. Get full control over your personal finances." />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://finance-tracking-frontend-three.vercel.app" />
+        <meta property="og:title" content="Finance Tracker – Track Your Income & Expenses" />
+        <meta property="og:description" content="Track your income, expenses and budget easily with Finance Tracker. Get full control over your personal finances." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://finance-tracking-frontend-three.vercel.app" />
+        <meta property="og:image" content="https://finance-tracking-frontend-three.vercel.app/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Finance Tracker – Track Your Income & Expenses" />
+        <meta name="twitter:description" content="Track your income, expenses and budget easily with Finance Tracker. Get full control over your personal finances." />
+      </Helmet>
       <div className="min-h-screen">
         <MobileNav />
         <div className={`mx-auto flex min-h-screen max-w-[1720px] gap-6 px-4 py-5 xl:px-8 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}>
